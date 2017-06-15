@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pudong.airport.dao.mysql.MysqlDao">
+
+	<insert id="insertResCpuUse" parameterType="java.util.List">
+		INSERT INTO RES_P_S_CPU_USE (SAMPLETIME,OBJECTID,NAME,IPADDR,CPU_USAGE)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.sampleTime},#{item.objectId},#{item.name},#{item.ipaddr},#{item.cpuUsage})
+		</foreach>
+		ON DUPLICATE KEY UPDATE CPU_USAGE=VALUES(CPU_USAGE)
+	</insert>
+
+	<insert id="insertResRamUse" parameterType="java.util.List">
+		INSERT INTO RES_P_S_RAM_USE (SAMPLETIME,OBJECTID,NAME,IPADDR,MEM_USAGE)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.sampleTime},#{item.objectId},#{item.name},#{item.ipaddr},#{item.memUsage})
+		</foreach>
+		ON DUPLICATE KEY UPDATE MEM_USAGE=VALUES(MEM_USAGE)
+	</insert>
+
+	<insert id="insertResNetDeviceState" parameterType="java.util.List">
+		INSERT INTO RES_P_S_DEVICE_NET_STATE (SAMPLETIME,OBJECTID,NAME,IPADDR,ICMP_RESPONSE_TIME)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.sampleTime},#{item.objectId},#{item.name},#{item.ipaddr},#{item.responseTime})
+		</foreach>
+		ON DUPLICATE KEY UPDATE ICMP_RESPONSE_TIME=VALUES(ICMP_RESPONSE_TIME)
+	</insert>
+
+	<insert id="insertAbtAlert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ABT_ALERT (LAST_UPDATE,ENTITY_ID,NAME,IPADDR,DEVNETLEV,SEVERITY,DESCRIPTION,TYPE,SYNCHRO_TIME)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.lastUpdate},#{item.entityId},#{item.name},#{item.ipaddr},#{item.devNetLev},
+			#{item.severity},#{item.description},#{item.type},#{item.synchroTime})
+		</foreach>
+	</insert>
+
+	<insert id="insertAbtAlertNum" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ABT_ALERT_NUM (currentTime,alertCode,alertNum)
+		SELECT IFNULL(t2.currentTime,#{currentTime}) AS currentTime,t1.code AS alertCode,IFNULL(t2.alertNum,0) AS alertNum
+		FROM ABT_NET_LEVEL_DICT t1
+		LEFT JOIN
+		(SELECT #{currentTime} AS currentTime,DEVNETLEV,count(1) AS alertNum FROM ABT_ALERT
+		WHERE SYNCHRO_TIME = #{currentTime} GROUP BY DEVNETLEV) t2 on t1.code = t2.DEVNETLEV
+	</insert>
+
+	<insert id="insertAbtAlertServer" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO
+		ABT_ALERT_SERVER(LAST_UPDATE,ENTITY_ID,NAME,CODE,LABEL,IPADDR,SEVERITY,DESCRIPTION,TYPE,SYNCHRO_TIME)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.lastUpdate},#{item.entityId},#{item.name},#{item.dsCode},#{item.dsLabel},#{item.ipaddr},
+			#{item.severity},#{item.description},#{item.type},#{item.synchroTime})
+		</foreach>
+	</insert>
+
+	<insert id="insertAbtAlertServerNum" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ABT_ALERT_SERVER_NUM (currentTime,alertCode,alertNum)
+		SELECT IFNULL(t2.currentTime,#{currentTime}) AS currentTime,t1.DS_CODE AS alertCode,IFNULL(t2.alertNum,0) AS
+		alertNum
+		FROM ABT_BUSINESS_DICT t1
+		LEFT JOIN
+		(SELECT #{currentTime} AS currentTime,CODE,count(1) AS alertNum FROM ABT_ALERT_SERVER
+		WHERE SYNCHRO_TIME = #{currentTime} GROUP BY CODE) t2 on t1.DS_CODE = t2.CODE
+	</insert>
+
+	<insert id="insertAbtBusinessDict" parameterType="java.util.List">
+		INSERT INTO
+		ABT_BUSINESS_DICT(DS_ID,DS_CODE,DS_LABEL)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.dsId},#{item.dsCode},#{item.dsLabel})
+		</foreach>
+		ON DUPLICATE KEY UPDATE DS_LABEL=VALUES(DS_LABEL)
+	</insert>
+</mapper>

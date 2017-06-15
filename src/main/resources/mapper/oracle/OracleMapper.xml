@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pudong.airport.dao.oracle.OracleDao">
+
+    <resultMap id="resCpuUse" type="com.pudong.airport.model.ResCpuUse">
+        <result property="sampleTime" column="sampleTime"/>
+        <result property="objectId" column="objectId"/>
+        <result property="name" column="name"/>
+        <result property="ipaddr" column="ipaddr"/>
+        <result property="cpuUsage" column="cpuUsage"/>
+    </resultMap>
+
+    <select id="getResCpuUse" resultMap="resCpuUse">
+		SELECT to_char(a.SAMPLETIME,'yyyy-mm-dd hh24:mi:ss') AS sampleTime,a.OBJECTID AS objectId,a.NAME AS
+		name,a.IPADDR AS ipaddr,a.CPU_USAGE AS cpuUsage
+		FROM  RES_P_S_CPU_USE a
+	</select>
+
+</mapper>

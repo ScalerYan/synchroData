@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pudong.airport.dao.mysql.MysqlDao">
+
+	<insert id="insertResCpuUse" parameterType="java.util.List">
+		INSERT INTO RES_P_S_CPU_USE (SAMPLETIME,OBJECTID,NAME,IPADDR,CPU_USAGE)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.sampleTime},#{item.objectId},#{item.name},#{item.ipaddr},#{item.cpuUsage})
+		</foreach>
+		ON DUPLICATE KEY UPDATE CPU_USAGE=VALUES(CPU_USAGE)
+	</insert>
+</mapper>

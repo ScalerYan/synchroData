@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pudong.airport.dao.oracle.OracleDao">
+
+    <resultMap id="resCpuUse" type="com.pudong.airport.model.ResCpuUse">
+        <result property="sampleTime" column="sampleTime"/>
+        <result property="objectId" column="objectId"/>
+        <result property="name" column="name"/>
+        <result property="ipaddr" column="ipaddr"/>
+        <result property="cpuUsage" column="cpuUsage"/>
+    </resultMap>
+
+    <select id="getResCpuUse" resultMap="resCpuUse">
+		SELECT to_char(c.SAMPLETIME,'yyyy-mm-dd hh24:mi:ss') AS sampleTime,c.OBJECTID AS objectId,b.NAME AS
+		name,a.IPADDR AS ipaddr,c.CPU_USAGE AS cpuUsage
+		FROM RES_INST_NETDEV a LEFT JOIN RES_OBJECT b ON a.ID = b.ID JOIN RES_P_S_CPU_USE c ON b.ID_INT = c.OBJECTID
+		where b.NAME is not null or a.IPADDR is not null
+	</select>
+
+    <resultMap id="resRamUse" type="com.pudong.airport.model.ResRamUse">
+        <result property="sampleTime" column="sampleTime"/>
+        <result property="objectId" column="objectId"/>
+        <result property="name" column="name"/>
+        <result property="ipaddr" column="ipaddr"/>
+        <result property="memUsage" column="memUsage"/>
+    </resultMap>
+
+    <select id="getResRamUse" resultMap="resRamUse">
+		SELECT to_char(c.SAMPLETIME,'yyyy-mm-dd hh24:mi:ss') AS sampleTime,c.OBJECTID AS objectId,b.NAME AS name
+		,a.IPADDR AS ipaddr,c.MEM_USAGE AS memUsage FROM
+		RES_INST_NETDEV a LEFT JOIN RES_OBJECT b ON a.ID = b.ID JOIN RES_P_S_RAM_USE c ON b.ID_INT = c.OBJECTID
+		where b.NAME is not null or a.IPADDR is not null
+	</select>
+
+    <resultMap id="resNetDeviceState" type="com.pudong.airport.model.ResNetDeviceState">
+        <result property="sampleTime" column="sampleTime"/>
+        <result property="objectId" column="objectId"/>
+        <result property="name" column="name"/>
+        <result property="ipaddr" column="ipaddr"/>
+        <result property="responseTime" column="responseTime"/>
+    </resultMap>
+
+    <select id="getResNetDeviceState" resultMap="resNetDeviceState">
+		SELECT to_char(c.SAMPLETIME,'yyyy-mm-dd hh24:mi:ss') AS sampleTime,c.OBJECTID AS objectId
+		,b.NAME AS name,a.IPADDR AS ipaddr,c.ICMP_RESPONSE_TIME AS responseTime FROM RES_INST_NETDEV a
+		LEFT JOIN RES_OBJECT b ON a.ID = b.ID JOIN
+		RES_P_S_DEVICE_NET_STATE c ON b.ID_INT = c.OBJECTID where b.NAME is not null or a.IPADDR is not null
+	</select>
+
+    <resultMap id="abtAlert" type="com.pudong.airport.model.AbtAlert">
+        <result property="lastUpdate" column="lastUpdate"/>
+        <result property="entityId" column="entityId"/>
+        <result property="name" column="name"/>
+        <result property="ipaddr" column="ipaddr"/>
+        <result property="devNetLev" column="devNetLev"/>
+        <result property="severity" column="severity"/>
+        <result property="description" column="description"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <select id="getAbtALert" resultMap="abtAlert">
+		SELECT t1.LAST_UPDATE AS lastUpdate,t1.ENTITY_ID AS entityId,t3.NAME AS name,t1.ENTITY_ADDR AS ipaddr,
+		t2.DEVNETLEV AS devNetLev,t1.SEVERITY AS severity,t1.DESCRIPTION AS description,t4.NAME AS type FROM
+		ABT_ALERT t1 JOIN RES_INST_NETDEV t2 ON t1.ENTITY_ADDR=t2.IPADDR AND (t1.STATUS=0 or t1.STATUS=150)
+		AND t1.MAX_SEVERITY>10 AND t2.DEVNETLEV IS NOT NULL JOIN RES_OBJECT t3 ON t2.ID=t3.ID LEFT JOIN
+		ABT_ALERT_TYPE t4 ON t1.TYPE_CODE=t4.CODE ORDER BY t1.LAST_UPDATE DESC
+	</select>
+
+    <resultMap id="abtAlertServer" type="com.pudong.airport.model.AbtAlertServer">
+        <result property="lastUpdate" column="lastUpdate"/>
+        <result property="entityId" column="entityId"/>
+        <result property="name" column="name"/>
+        <result property="dsCode" column="dsCode"/>
+        <result property="dsLabel" column="dsLabel"/>
+        <result property="ipaddr" column="ipaddr"/>
+        <result property="severity" column="severity"/>
+        <result property="description" column="description"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <select id="getAbtAlertServer" resultMap="abtAlertServer">
+		select t1.LAST_UPDATE AS lastUpdate,t1.ENTITY_ID AS entityId,t3.NAME AS name,t4.DS_CODE AS dsCode,
+		t4.DS_LABEL AS dsLabel,t1.ENTITY_ADDR AS ipaddr,t1.SEVERITY AS severity,t1.DESCRIPTION AS description,
+		t5.NAME AS type from ABT_ALERT t1 JOIN RES_INST_COMPUTER t2 ON t1.ENTITY_ADDR = t2.IPADDR
+		AND (t1.STATUS=0 or t1.STATUS=150) and t1.MAX_SEVERITY >10 JOIN RES_OBJECT t3 on t2.ID=t3.ID JOIN
+		ITIL_BIZCODE t4 on t4.DS_ID=t3.YWXT LEFT JOIN ABT_ALERT_TYPE t5 on t1.TYPE_CODE = t5.CODE
+		ORDER BY t1.LAST_UPDATE DESC
+	</select>
+
+    <resultMap id="abtBusinessDict" type="com.pudong.airport.model.AbtBusinessDict">
+        <result property="dsId" column="dsId"/>
+        <result property="dsCode" column="dsCode"/>
+        <result property="dsLabel" column="dsLabel"/>
+    </resultMap>
+
+    <select id="getAbtBusinessDict" resultMap="abtBusinessDict">
+		select DS_ID AS dsId,DS_CODE AS dsCode,DS_LABEL AS dsLabel from ITIL_BIZCODE a where
+		a.DS_BUSINESS_NAME='yewuxitong'
+	</select>
+
+</mapper>
